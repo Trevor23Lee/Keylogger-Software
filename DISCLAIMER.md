@@ -5,9 +5,9 @@ This code is provided for educational and research purposes only. It is intended
 ### Important Notes:
 1. Ethical Use: This project must not be used for unethical activities, illegal hacking, or any form of unauthorized access to systems or data. The code is not intended to be used for malicious purposes, including but not limited to:
 
-- Unauthorized access to user accounts or systems.
-- Phishing or data harvesting.
-- Interfering with or modifying log files without proper consent.
+  - Unauthorized access to user accounts or systems.
+  - Phishing or data harvesting.
+  - Interfering with or modifying log files without proper consent.
 2. Responsibility: By using this code, you agree to take full responsibility for its use. You must ensure that your actions comply with all relevant laws and regulations. Misuse of this project could lead to severe legal and ethical consequences.
 
 3. Do Not Deploy for Unauthorized Use: This software is not designed for deployment in a real-world, production environment where it could be used to analyze sensitive or private data without permission.
