@@ -1,0 +1,12 @@
+Keylogger started at: Thu Dec 12 22:19:35 2024
+
+hello I am a human . Dog a rare a dog and dog sodog dog dog youtube.com https / ? / tryhackme.com password23 @ !
+----------------------------------------
+
+Most common word: 'dog' (appears 4 times)
+----------------------------------------
+
+URLs Found: ['youtube.com', 'tryhackme.com']
+----------------------------------------
+
+Potential Passwords found: ['password23@!']
