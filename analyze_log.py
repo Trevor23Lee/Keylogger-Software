@@ -6,18 +6,20 @@ def read_log_file(file_path):
     with open(file_path, "r") as file:
         return file.readlines()
 
+
 # Function to remove timestamps and clean up lines
 def clean_log_lines(log_lines):
     cleaned_lines = []
     
-    first_line = log_lines[0].strip()  # Timestamp line
+    first_line = log_lines[0].strip()  
 
     for line in log_lines[1:]:
-        # Remove timestamp pattern (assuming timestamps are at the start of each line)
-        cleaned_line = re.sub(r".*?-", "", line).strip()  # Timestamp regex
+        # Remove timestamp pattern 
+        cleaned_line = re.sub(r".*?-", "", line).strip() 
         cleaned_lines.append(cleaned_line)
     
     return cleaned_lines, first_line
+
 
 # Function to reconstruct the keystrokes into words
 def reconstruct_text(cleaned_lines):
@@ -25,115 +27,134 @@ def reconstruct_text(cleaned_lines):
     for line in cleaned_lines:
         if line.startswith("Key.space"):
             text += " "
+        elif line.startswith("Key.backspace"):
+            text = text[:-1]
         elif line.startswith("Key.") or line == "Key.enter":  # Skip special keys
             continue
         else:
-            text += line  # Add the valid keypresses (letters/numbers/punctuation)
+            text += line  # Add the valid keypresses (letters,numbers,punctuation)
     return text
 
-# Function to extract words from the reconstructed text
+
+# Function to extract words from the reconstructed text - also making sure URLs and emails stay constructed
 def extract_words_and_urls(text):
-    # List of valid domain extensions we are interested in
     valid_domains = ['com', 'org', 'net', 'gov', 'edu', 'io', 'co', 'me', 'us']
     
-    # Modify the regex to match words, punctuation, and URLs (even when split by space)
-    words_and_urls = []
-    words = re.findall(r"\b\w+\b|[.,!?;()/@]", text)
+    # Email pattern with regex: [words]@[words].[words]
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
+    emails = re.findall(email_pattern, text)
     
-    # Combine "word . com", "word . org", etc., into one single word if it's a valid domain
+    # Modify the regex to match words, punctuation, and URLs
+    words_and_urls = []
+    words = re.findall(r"\b\w+\b|[.,!?;()/@&*^%#$~=+]", text)
+
+    # Combine URLs as well as domains
     i = 0
     while i < len(words) - 1:
+        # Domains:
         if words[i].isalpha() and words[i + 1] == "." and i + 2 < len(words) and words[i + 2] in valid_domains:
-            # Join word + valid domain as a single URL
             words_and_urls.append(words[i] + "." + words[i + 2])
-            i += 3  # Skip the next two items (the dot and the domain extension)
+            i += 3  
         else:
             words_and_urls.append(words[i])
             i += 1
-    if i == len(words) - 1:  # If there's only one word left, add it to the list
+        # Emails
+        if words[i].isalpha() and words[i + 1] == "@" and i + 2 < len(words):
+            words_and_urls.append(words[i] + "@" + words[i + 2])
+            i += 3  
+
+            
+    if i == len(words) - 1:  
         words_and_urls.append(words[i])
 
-    return words_and_urls
+    return words_and_urls, emails
 
-# Function to detect the most common word
+
+def get_only_words(text):
+    # Extract words consisting of letters, digits, or underscores
+    words_only = re.findall(r'\b\w+\b', text)
+    return words_only
+
+# Function to detect the most common word with it's count
 def detect_most_common_word(words):
+    
     word_counts = Counter(words)
-    most_common_word, count = word_counts.most_common(1)[0]  # Get the most common word and its count
+    most_common_word, count = word_counts.most_common(1)[0]  
     return most_common_word, count
+
 
 # Function to detect URLs
 def detect_urls(words):
-    # List of valid domain extensions we are interested in
-    valid_domains = ['com', 'org', 'net', 'gov', 'edu', 'io', 'co', 'me', 'us']
+    url_pattern = re.compile(r'\b(?:[a-zA-Z0-9-]+\.)+(?:com|org|net|gov|edu|io|co|me|us)\b')
     
-    urls = []
-    for word in words:
-        # Check if the word contains any valid domain
-        for domain in valid_domains:
-            if domain in word:
-                urls.append(word)
-                break  # If a valid domain is found, no need to check further
+    urls = [word for word in words if url_pattern.search(word)]
     
     return urls
 
 
+
 # Function to detect passwords (odd letters combined with numbers and special characters)
 def detect_passwords(text):
-    # Detect potential passwords in raw text, including special characters
     password_pattern = r"\b[A-Za-z0-9!@#$%^&*()_+={}\[\]:;'\"<>,.?/\\|-]*\d+[A-Za-z0-9!@#$%^&*()_+={}\[\]:;'\"<>,.?/\\|-]+\b"
     passwords = [word for word in text.split() if re.match(password_pattern, word)]
     return passwords
 
+
 # Function to output the extracted words to a file
-def output_to_file(words, first_line, output_file, most_common_word, count, urls, passwords):
+def output_to_file(words, first_line, output_file, most_common_word, count, urls, passwords, emails):
     with open(output_file, "w") as file:
-        file.write(first_line + "\n\n")  # Write the first line separately
-        file.write(" ".join(words))  # Join the words with a space between them and write to the file
-        file.write("\n----------------------------------------\n\n")
-
-        file.write(f"Most common word: '{most_common_word}' (appears {count} times)")
-
-        file.write("\n----------------------------------------\n\n")
-
+        # Write the first line (timestamp)
+        file.write(first_line + "\n\n")
+        
+        # Write the reconstructed words at the top
+        file.write(" ".join(words) + "\n")
+        file.write("---------------------------------------------------------------\n\n")
+        
+        # Most common word
+        file.write(f"Most common word: '{most_common_word}' (appears {count} times)\n")
+        file.write("---------------------------------------------------------------\n\n")        
+        # URLs section
         if urls:
-            file.write(f"URLs Found: {urls}")
+            file.write(f"URLs Found: {urls}\n")
         else:
-            file.write("No URLs Found.")
-
-        file.write("\n----------------------------------------\n\n")
-
+            file.write("No URLs Found.\n")
+        file.write("---------------------------------------------------------------\n\n")        
+        # Passwords section
         if passwords:
-            file.write(f"Potential Passwords found: {passwords}")
+            file.write(f"Potential Passwords found: {passwords}\n")
         else:
-            file.write("No Passwords detected.")
+            file.write("No Passwords detected.\n")
+        file.write("---------------------------------------------------------------\n\n")        
+        # Emails section
+        if emails:
+            file.write(f"Emails Found: {emails}\n")
+        else:
+            file.write("No Emails Found.\n")
+        file.write("---------------------------------------------------------------\n\n")
 
-# Main program
+
+
+
 def main():
-    input_file = "raw_log.txt"  # Path to your raw log file
-    output_file = "extracted_words.txt"  # Output file to store the extracted words
+    input_file = "raw_log.txt"  
+    output_file = "extracted_words.txt"  
 
     log_lines = read_log_file(input_file)
     
-    # Step 1: Clean log lines by removing timestamps
     cleaned_lines, first_line = clean_log_lines(log_lines)
 
-    # Step 2: Reconstruct the text from keystrokes
     reconstructed_text = reconstruct_text(cleaned_lines)
 
-    # Step 3: Detect passwords from the raw reconstructed text
     passwords = detect_passwords(reconstructed_text)
 
-    # Step 4: Extract words from the reconstructed text
-    all_words = extract_words_and_urls(reconstructed_text)
+    all_words,emails = extract_words_and_urls(reconstructed_text)
 
-    # Step 5: Detect the most common word
-    most_common_word, count = detect_most_common_word(all_words)
+    cleaned_words = get_only_words(reconstructed_text)
+    most_common_word, count = detect_most_common_word(cleaned_words)
 
-    # Step 6: Detect any URLs
     urls = detect_urls(all_words)
 
-    # Step 7: Output the words to a file
-    output_to_file(all_words, first_line, output_file, most_common_word, count, urls, passwords)
+    output_to_file(all_words, first_line, output_file, most_common_word, count, urls, passwords, emails)
     print(f"Words have been output to {output_file}")
 
 if __name__ == "__main__":
