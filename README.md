@@ -1,4 +1,2 @@
 # Keylogger-Software
-This is a basic keylogger, that is able to detect any key strokes, mouse clicking, etc. to then log it into a file. 
-The file it will make will be encrypted for security purposes. Then the user with the file and access, can then 
-put the file through a pattern analysis.
+This is a keylogger script to be able to log any key strokes. Then another script for analysis. This analysis script will detect and find any patterns that relate to emails, passwords, and URLs. As well as the most common word typed. Please read the Disclaimer to use properly. 
