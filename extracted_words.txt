@@ -1,17 +1,17 @@
-Keylogger started at: Fri Dec 13 12:26:57 2024
+Keylogger started at: Fri Dec 13 16:32:25 2024
 
-This is a test . i like dogs , dogs are cool and dogs are nice . There is a dog in my room . My password is password35 ! et5G0 and my username is trevlee@gmail . com or i can use my other email , which i use for my dog , dogs@doggy . com I use this on my website which is dog.com or also check youtube.com or tryhackme.com or educatedogs . eu Pass33word11 !
+This is a keylogger test , this is all being logged from a keylogger . This keylogger will pick up every key stroke . That is scary ! Then it will be analyzed . Hopefully I don t go to a website like TryHackMe.com and type in my credentials . Which being keylogged@example . com and my password being P @ $ $ W0rd ! 99 for the website . That keylogger will log that in and might find a tutorial for a tryhackme room on youtube.com with my account ! Might have to email tryhackme@support . com or go to accounthelp.edu on what to do and how to keep myself safe from a keylogger . Or i can just hit the esc key to stop this keylogger
 ---------------------------------------------------------------
 
-Most common word: 'is' (appears 5 times)
+Most common word: 'keylogger' (appears 6 times)
 ---------------------------------------------------------------
 
-URLs Found: ['dog.com', 'youtube.com', 'tryhackme.com']
+URLs Found: ['TryHackMe.com', 'youtube.com', 'accounthelp.edu']
 ---------------------------------------------------------------
 
-Potential Passwords found: ['password35!et5G0', 'Pass33word11!']
+Potential Passwords found: ['P@$$W0rd!99']
 ---------------------------------------------------------------
 
-Emails Found: ['trevlee@gmail.com', 'dogs@doggy.com']
+Emails Found: ['keylogged@example.com', 'tryhackme@support.com']
 ---------------------------------------------------------------
 

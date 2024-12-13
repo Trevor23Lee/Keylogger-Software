@@ -50,20 +50,22 @@ def extract_words_and_urls(text):
 
     # Combine URLs as well as domains
     i = 0
-    while i < len(words) - 1:
-        # Domains:
-        if words[i].isalpha() and words[i + 1] == "." and i + 2 < len(words) and words[i + 2] in valid_domains:
+    while i < len(words):
+        if i + 2 < len(words) and words[i].isalpha() and words[i + 1] == "." and words[i + 2] in valid_domains:
+            # This is a domain, treat it as a URL
             words_and_urls.append(words[i] + "." + words[i + 2])
             i += 3  
+
+        elif i + 2 < len(words) and words[i].isalpha() and words[i + 1] == "@" and words[i + 2].isalpha():
+            # This is an email, treat it as such
+            words_and_urls.append(words[i] + "@" + words[i + 2])
+            i += 3  
+            
         else:
             words_and_urls.append(words[i])
             i += 1
-        # Emails
-        if words[i].isalpha() and words[i + 1] == "@" and i + 2 < len(words):
-            words_and_urls.append(words[i] + "@" + words[i + 2])
-            i += 3  
 
-            
+
     if i == len(words) - 1:  
         words_and_urls.append(words[i])
 
@@ -72,8 +74,10 @@ def extract_words_and_urls(text):
 
 def get_only_words(text):
     # Extract words consisting of letters, digits, or underscores
+    STOP_WORDS = {"a", "an", "and", "the", "is", "are", "of", "to", "in", "on", "for", "it", "with", "at", "by", "this"}
     words_only = re.findall(r'\b\w+\b', text)
-    return words_only
+    filtered_words = [word for word in words_only if word.lower() not in STOP_WORDS]
+    return filtered_words
 
 # Function to detect the most common word with it's count
 def detect_most_common_word(words):
@@ -85,12 +89,16 @@ def detect_most_common_word(words):
 
 # Function to detect URLs
 def detect_urls(words):
+    # URL pattern without the '@' symbol, allowing for domains like example.com
     url_pattern = re.compile(r'\b(?:[a-zA-Z0-9-]+\.)+(?:com|org|net|gov|edu|io|co|me|us)\b')
-    
-    urls = [word for word in words if url_pattern.search(word)]
+
+    urls = []
+    for word in words:
+        # Exclude words containing '@' to prevent emails from being detected as URLs
+        if '@' not in word and url_pattern.match(word):
+            urls.append(word)
     
     return urls
-
 
 
 # Function to detect passwords (odd letters combined with numbers and special characters)
@@ -150,6 +158,7 @@ def main():
     all_words,emails = extract_words_and_urls(reconstructed_text)
 
     cleaned_words = get_only_words(reconstructed_text)
+
     most_common_word, count = detect_most_common_word(cleaned_words)
 
     urls = detect_urls(all_words)
